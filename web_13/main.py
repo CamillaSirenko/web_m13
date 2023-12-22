@@ -11,6 +11,10 @@ from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from dotenv import load_dotenv
 from src.conf.config import config
+from fastapi.security import OAuth2PasswordBearer
+from fastapi_limiter import FastAPILimiter
+from fastapi_limiter.depends import RateLimiter
+from fastapi.routing import Request
 import os
 import uvicorn
 import cloudinary
@@ -49,6 +53,38 @@ conf = ConnectionConfig(
     VALIDATE_CERTS=True,
     TEMPLATE_FOLDER=Path(__file__).parent / 'templates',
 )
+
+
+ 
+# Налаштування обмежень
+limiter = FastAPILimiter(
+    key_func=lambda _: "global",  # Ідентифікатор для глобального обмеження
+    redis_url="redis://localhost:6379/0",   
+)
+ 
+@app.get("/contacts/", dependencies=[Depends(RateLimiter(times=5, minutes=1))])
+async def read_contacts():
+    return {"message": "Read contacts"}
+
+ 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+@app.get("/user/contacts/", dependencies=[Depends(RateLimiter(times=5, minutes=1))])
+async def read_user_contacts(token: str = Depends(oauth2_scheme)):
+    return {"message": "Read user contacts"}
+
+# Застосування глобального обмеження на швидкість для всіх маршрутів
+@app.middleware("http")
+async def limiter_middleware(request: Request, call_next):
+    await limiter.init()
+    response = await call_next(request)
+    await limiter.close()
+    return response
+
+# Додавання обробника помилок для обробки випадку перевищення обмежень
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request, exc):
+    return {"error": exc.detail}
 
 async def get_current_email(token: str = Depends(auth_service.oauth2_scheme)):
     return await get_email_from_token(token)

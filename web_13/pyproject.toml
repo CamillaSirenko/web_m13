@@ -21,6 +21,9 @@ libgravatar = "^1.0.4"
 bcrypt = "^4.1.1"
 fastapi-mail = "^1.4.1"
 cloudinary = "^1.37.0"
+fastapi-limiter = "^0.1.5"
+aioredis = "^2.0.1"
+redis = "==4.*"
 
 [build-system]
 requires = ["poetry-core"]
