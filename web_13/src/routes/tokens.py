@@ -8,13 +8,13 @@ from src.database.db import get_db
 from src.schemas import ContactCreateUpdate, ContactResponse, Token
 from passlib.context import CryptContext
 from dotenv import load_dotenv
-
+from src.conf.config import config
 
 
 load_dotenv()
 
-SECRET_KEY = "@43r4645ybgscsss4w"
-ALGORITHM = "HS256"
+SECRET_KEY = config.SECRET_KEY_JWT 
+ALGORITHM = config.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

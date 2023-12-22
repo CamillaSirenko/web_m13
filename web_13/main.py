@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from dotenv import load_dotenv
+from src.conf.config import config
 import os
 import uvicorn
 import cloudinary
@@ -22,11 +23,11 @@ auth_service = Auth()
 
 
 cloudinary.config(
-    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    cloud_name=config.CLD_NAME,
+    api_key=config.CLD_API_KEY,
+    api_secret=config.CLD_API_SECRET,
+    secure=True,
 )
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -36,12 +37,12 @@ app.add_middleware(
 )
 
 conf = ConnectionConfig(
-    MAIL_USERNAME="example@meta.ua",
-    MAIL_PASSWORD="secretPassword",
-    MAIL_FROM="example@meta.ua",
-    MAIL_PORT=465,
-    MAIL_SERVER="smtp.meta.ua",
-    MAIL_FROM_NAME="Example email",
+    MAIL_USERNAME=config.MAIL_USERNAME,
+    MAIL_PASSWORD=config.MAIL_PASSWORD,
+    MAIL_FROM=config.MAIL_USERNAME,
+    MAIL_PORT=config.MAIL_PORT,
+    MAIL_SERVER=config.MAIL_SERVER,
+    MAIL_FROM_NAME="TODO Systems",
     MAIL_STARTTLS=False,
     MAIL_SSL_TLS=True,
     USE_CREDENTIALS=True,
@@ -56,7 +57,7 @@ async def get_current_email(token: str = Depends(auth_service.oauth2_scheme)):
 async def send_in_background(
     background_tasks: BackgroundTasks,
     body: EmailSchema,
-    current_email: str = Depends(get_current_email),  # Use Depends to get the current email
+    current_email: str = Depends(get_current_email),   
 ):
     message = MessageSchema(
         subject="Fastapi mail module",
@@ -81,7 +82,7 @@ async def upload_avatar(file: UploadFile):
     response = upload(contents, folder="avatars")
 
     if response.get("public_id"):
-        # Отримати URL зображення з відповіді Cloudinary
+         
         url, options = cloudinary_url(response["public_id"], format="png")
         return {"avatar_url": url}
     else:

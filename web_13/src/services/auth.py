@@ -10,14 +10,14 @@ from src.services.email import send_email
 from src.database.db import get_db
 from src.repository import users as repository_users
 from src.schemas import UserModel, UserResponse
-
+from src.conf.config import config
 
 router = APIRouter()
 
 class Auth:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    SECRET_KEY = "secret_key"
-    ALGORITHM = "HS256"
+    SECRET_KEY =config.SECRET_KEY_JWT 
+    ALGORITHM =config.ALGORITHM
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
     def verify_password(self, plain_password, hashed_password):

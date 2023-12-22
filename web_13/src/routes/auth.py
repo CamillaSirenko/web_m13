@@ -10,7 +10,7 @@ from src.schemas import UserModel, UserResponse, TokenModel, RequestEmail
 from jose import JWTError, jwt
 from fastapi import HTTPException, status, Depends
 from src.services.email import send_email
-
+from src.conf.config import config
 
 router = APIRouter(prefix='/auth', tags=["auth"])
 security = HTTPBearer()
