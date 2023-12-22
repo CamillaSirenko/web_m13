@@ -13,9 +13,6 @@ class Settings(BaseSettings):
     MAIL_FROM: str = "postgres"
     MAIL_PORT: int = 567234
     MAIL_SERVER: str = "postgres"
-    REDIS_DOMAIN: str = 'localhost'
-    REDIS_PORT: int = 6379
-    REDIS_PASSWORD: str | None = None
     CLD_NAME: str = 'dlraufrwg'
     CLD_API_KEY: int = 327154174922339 
     CLD_API_SECRET: str = "XONtM01vGvh7LGIZhSYxVkpYB7E "
