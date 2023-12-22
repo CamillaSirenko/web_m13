@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "web-11"
+version = "0.1.0"
+description = ""
+authors = ["OlgaSirenko <132263673+CamillaSirenko@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "*"
+sqlalchemy = "^1.4.0"
+databases = "^0.5.2"
+psycopg2-binary = "^2.9.1"
+uvicorn = "^0.24.0.post1"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+pyjwt = "^2.8.0"
+python-multipart = "^0.0.6"
+alembic = "^1.13.0"
+libgravatar = "^1.0.4"
+bcrypt = "^4.1.1"
+fastapi-mail = "^1.4.1"
+cloudinary = "^1.37.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
