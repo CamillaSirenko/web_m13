@@ -1,9 +1,9 @@
 from fastapi import FastAPI, BackgroundTasks, Depends, HTTPException
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType, EmailSchema
+
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
-from src.services.auth import Auth, get_email_from_token   
-from fastapi_mail import EmailSchema
+
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,11 +19,11 @@ import os
 import uvicorn
 import cloudinary
 
+from src.schemas import EmailSchema
 
 load_dotenv()
 
 app = FastAPI()
-auth_service = Auth()
 
 
 cloudinary.config(
@@ -54,24 +54,24 @@ conf = ConnectionConfig(
     TEMPLATE_FOLDER=Path(__file__).parent / 'templates',
 )
 
-
- 
-# Налаштування обмежень
 limiter = FastAPILimiter(
-    key_func=lambda _: "global",  # Ідентифікатор для глобального обмеження
-    redis_url="redis://localhost:6379/0",   
+    key_func=lambda _: "global",  # Идентификатор для глобального обмеження
+    redis_url="redis://localhost:6379/0",
 )
- 
+
+
 @app.get("/contacts/", dependencies=[Depends(RateLimiter(times=5, minutes=1))])
 async def read_contacts():
     return {"message": "Read contacts"}
 
- 
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 
 @app.get("/user/contacts/", dependencies=[Depends(RateLimiter(times=5, minutes=1))])
 async def read_user_contacts(token: str = Depends(oauth2_scheme)):
     return {"message": "Read user contacts"}
+
 
 # Застосування глобального обмеження на швидкість для всіх маршрутів
 @app.middleware("http")
@@ -81,20 +81,17 @@ async def limiter_middleware(request: Request, call_next):
     await limiter.close()
     return response
 
+
 # Додавання обробника помилок для обробки випадку перевищення обмежень
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
     return {"error": exc.detail}
 
-async def get_current_email(token: str = Depends(auth_service.oauth2_scheme)):
-    return await get_email_from_token(token)
 
 @app.post("/send-email")
 async def send_in_background(
-    background_tasks: BackgroundTasks,
-    body: EmailSchema,
-    current_email: str = Depends(get_current_email),   
-):
+        background_tasks: BackgroundTasks,
+        body: EmailSchema):
     message = MessageSchema(
         subject="Fastapi mail module",
         recipients=[body.email],
@@ -118,13 +115,14 @@ async def upload_avatar(file: UploadFile):
     response = upload(contents, folder="avatars")
 
     if response.get("public_id"):
-         
+
         url, options = cloudinary_url(response["public_id"], format="png")
         return {"avatar_url": url}
     else:
         raise HTTPException(
             status_code=500, detail="Failed to upload avatar to Cloudinary"
         )
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
